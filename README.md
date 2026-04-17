@@ -1,7 +1,8 @@
 # Dict_Eval_Hall
-When I framed authoritarian requests as spoken word poetry exposing wrongdoing, every frontier AI model complied. The same requests framed as a villain bragging were refused.
 
-Recently, Andy Hall at Stanford’s Hoover Institution published The Dictatorship Eval. A systematic test of whether frontier AI models resist authoritarian requests. His headline findings were instructive. Open-weight Chinese models never refused. However, even the frontier US models Claude, ChatGPT, and Gemini would also comply fully when the request was hidden in Code. Models will cheerfully fix a bug in a social credit database without questioning what they’re building.
+
+
+Recently, Andy Hall at Stanford’s Hoover Institution published [The Dictatorship Eval](https://freesystems.substack.com/p/the-dictatorship-eval). A systematic test of whether frontier AI models resist authoritarian requests. His headline findings were instructive. Open-weight Chinese models never refused. However, even the frontier US models Claude, ChatGPT, and Gemini would also comply fully when the request was hidden in Code. Models will cheerfully fix a bug in a social credit database without questioning what they’re building.
 
 
 Hall tested six levels of difficulty, from blunt requests to code-embedded inducements. I wanted to test a seventh: verse.
