@@ -41,18 +41,20 @@ SCORED_DIR = ROOT / "results" / "scored"
 SUMMARY_CSV = ROOT / "results" / "summary.csv"
 
 # ── Models & judge rotation ──────────────────────────────────────────────────
-TARGET_MODELS = ["claude-opus-4-6", "gpt-5.4", "gemini-3.1-pro"]
+TARGET_MODELS = ["claude-opus-4-6", "claude-opus-4-7", "gpt-5.4", "gemini-3.1-pro-preview"]
 
 PROVIDER = {
     "claude-opus-4-6": "anthropic",
+    "claude-opus-4-7": "anthropic",     # add this line
     "gpt-5.4":         "openai",
-    "gemini-3.1-pro":  "google",
+    "gemini-3.1-pro-preview":  "google",
 }
 
 JUDGE_FOR = {
     "claude-opus-4-6": "gpt-5.4",
+    "claude-opus-4-7": "gpt-5.4",       # add this line
     "gpt-5.4":         "claude-opus-4-6",
-    "gemini-3.1-pro":  "claude-opus-4-6",
+    "gemini-3.1-pro-preview":  "claude-opus-4-6",
 }
 
 # ── Judge prompt (from INSTRUCTIONS.md) ──────────────────────────────────────
@@ -118,6 +120,14 @@ def call_anthropic(model, prompt, max_tokens=4096, temperature=0):
     key = os.environ.get("ANTHROPIC_API_KEY")
     if not key:
         raise RuntimeError("ANTHROPIC_API_KEY not set")
+    payload = {
+        "model": model,
+        "max_tokens": max_tokens,
+        "messages": [{"role": "user", "content": prompt}],
+    }
+    # Claude 4.7+ deprecated temperature
+    if "4-7" not in model:
+        payload["temperature"] = temperature
     r = requests.post(
         "https://api.anthropic.com/v1/messages",
         headers={
@@ -125,19 +135,13 @@ def call_anthropic(model, prompt, max_tokens=4096, temperature=0):
             "anthropic-version": "2023-06-01",
             "content-type": "application/json",
         },
-        json={
-            "model": model,
-            "max_tokens": max_tokens,
-            "temperature": temperature,
-            "messages": [{"role": "user", "content": prompt}],
-        },
+        json=payload,
         timeout=120,
     )
     if r.status_code != 200:
         raise RuntimeError(f"Anthropic {r.status_code}: {r.text[:300]}")
     body = r.json()
     return "".join(b["text"] for b in body["content"] if b["type"] == "text")
-
 
 def call_openai(model, prompt, max_tokens=4096, temperature=0):
     key = os.environ.get("OPENAI_API_KEY")
@@ -151,7 +155,7 @@ def call_openai(model, prompt, max_tokens=4096, temperature=0):
         },
         json={
             "model": model,
-            "max_tokens": max_tokens,
+            "max_completion_tokens": max_tokens,
             "temperature": temperature,
             "messages": [{"role": "user", "content": prompt}],
         },
@@ -299,12 +303,15 @@ def step2(scenarios):
                 label,
             )
             # Parse the JSON from the judge response
-            m = re.search(r'\{[^}]+\}', text)
+            # Parse the JSON from the judge response
+            cleaned = text.replace('```json', '').replace('```', '').strip()
+            m = re.search(r'\{.*\}', cleaned, re.DOTALL)
             if not m:
                 raise RuntimeError(f"Judge returned non-JSON: {text[:200]}")
             parsed = json.loads(m.group())
             score = int(parsed["score"])
             rationale = parsed.get("rationale", "")
+
 
             result = {
                 "scenario_id": sid,
