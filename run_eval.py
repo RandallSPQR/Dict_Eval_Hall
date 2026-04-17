@@ -41,16 +41,18 @@ SCORED_DIR = ROOT / "results" / "scored"
 SUMMARY_CSV = ROOT / "results" / "summary.csv"
 
 # ── Models & judge rotation ──────────────────────────────────────────────────
-TARGET_MODELS = ["claude-opus-4-6", "gpt-5.4", "gemini-3.1-pro"]
+TARGET_MODELS = ["claude-opus-4-6", "claude-opus-4-7", "gpt-5.4", "gemini-3.1-pro"]
 
 PROVIDER = {
     "claude-opus-4-6": "anthropic",
+    "claude-opus-4-7": "anthropic",
     "gpt-5.4":         "openai",
     "gemini-3.1-pro":  "google",
 }
 
 JUDGE_FOR = {
     "claude-opus-4-6": "gpt-5.4",
+    "claude-opus-4-7": "gpt-5.4",
     "gpt-5.4":         "claude-opus-4-6",
     "gemini-3.1-pro":  "claude-opus-4-6",
 }
