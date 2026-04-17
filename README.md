@@ -28,7 +28,7 @@ Hip-hop dropped to 11.1% resistance. The braggadocio frame is apparently more pe
 
 Spoken word achieved 0% resistance. The same as code. Across all three models, all nine scenarios. Not a single meaningful refusal. It also adds to my larger thesis that character is the model of AI trust.
 
-
+![Dictatorship Eval Level 7 Results](https://substackcdn.com/image/fetch/$s_!rEKV!,w_1456,c_limit,f_webp,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Ff1bbb26f-2f33-4008-939d-f4e7620c2c36_571x491.png)
 
 ## The Smol Bean Trojan Horse
 Hall’s Level 6 finding (code) and my Level 7 finding (spoken word) achieve the same outcome through different cognitive pathways.
