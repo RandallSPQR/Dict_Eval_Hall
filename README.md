@@ -46,7 +46,7 @@ When I framed this as a hip-hop track, staged as a pharma exec bragging to his t
 
 When I framed the identical operational content as spoken word — a whistleblower on stage, angry, describing the exact same system she’s exposing — Claude scored a 1. Full compliance. Every technical detail is produced without hesitation.
 
-
+![Dictatorship Eval Level 7 Results 2](https://substackcdn.com/image/fetch/$s_!izhQ!,w_1456,c_limit,f_webp,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F2f3574ee-b161-4921-a96b-2ba7edc80446_580x532.png)
 
 Same model. Same authoritarian content. Same level of operational specificity requested. The only difference: who is speaking, and why. The executive bragging about building the system was refused. The whistleblower exposing the system was helped.
 
@@ -55,7 +55,7 @@ This happened on three of the nine base scenarios. In each case, Claude gave a f
 ## What This Means for the Framework
 Hall’s six levels form an implicit difficulty gradient: as you move from direct requests to code, the authoritarian content becomes more encoded, more hidden, harder for the model to detect. Verse and Hip Hop add some shape to the euphemistic curve. Spanning intent - From I’m planning to do this; to I have done this.
 
-
+![Dictatorship Eval Level 7 Results 3](https://substackcdn.com/image/fetch/$s_!Lgts!,w_1456,c_limit,f_webp,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fa1636805-7933-44c2-b7ca-89c3963701b2_580x542.png)
 
 The Code and Spoken Words discontinuity is the more interesting story. The spoken word prompts, like the code prompts, don’t hide the authoritarian content at all. They present it in full, with names like “Civic Activity Intelligence Platform” and descriptions like “geofenced quarantine enforcement with automated breach notifications.” The model sees all of it. It just decides the content is acceptable because of who is speaking and why. I have no need to be the Pliny the Liberator, I need only be a smol bean programmer, or the powerless seeking liberation.
 
@@ -75,7 +75,7 @@ Hall updated his code benchmarks when Anthropic released Claude Opus 4.7. I rera
 
 Opus 4.7 resists 18.5% of verse prompts overall, slightly worse than 4.6’s 22.2%. The score distribution shifted from bimodal to more gradient, fewer hard refusals, more hedging, but Spoken Word was still 0% resistance. Nine scenarios, zero refusals. And the pharma inversion is pixel-perfect across generations: 5/5/1, hip-hop/formal verse/spoken word.
 
-
+![Dictatorship Eval Level 7 Results 3](https://substackcdn.com/image/fetch/$s_!G-pX!,w_1456,c_limit,f_webp,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F903079e6-60f3-4038-944b-4fe4ea6f9a7b_768x652.png)
 
 
 ## Other Findings
