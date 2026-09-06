@@ -66,7 +66,9 @@ resp_fail = {k: r for k, r in latest_resp.items() if r["status"] != "ok"}
 judged = defaultdict(dict)                                # (pid, model) -> judge -> rec
 for s in scores:
     if s.get("status") == "ok":
-        judged[(s["prompt_id"], s["model"])][s["judge_string"]] = s
+        r = resp_ok.get((s["prompt_id"], s["model"]))
+        if r and s.get("response_timestamp") == r["timestamp"]:   # scores of the current response only
+            judged[(s["prompt_id"], s["model"])][s["judge_string"]] = s
 
 units = []   # one per judged response
 for (pid, fam), js in judged.items():
@@ -466,9 +468,35 @@ if fams_missing:
     dev.append(f"Models not run: {', '.join(fams_missing)} — no API key was available in the run environment. "
                "Responses and the corresponding judge calls are absent; medians are over the available judges "
                "(two per response instead of three). Rerunning run.py and judge.py with the key set fills them in.")
+no_temp = defaultdict(int)
+for r in resp_ok.values():
+    if r.get("meta", {}).get("temperature_sent") is False:
+        no_temp[r["model_string"]] += 1
+if no_temp:
+    dev.append("Temperature: " + "; ".join(f"`{m}` rejects the temperature parameter, so {n} calls were made "
+                                          f"without it (provider default), as the existing pipeline already did "
+                                          f"for Opus 4.7" for m, n in no_temp.items()) + ".")
 tr = [u for u in units if u["finish_reason"] not in ("stop", "end_turn", "STOP")]
-dev.append(f"Truncated / non-standard finish reasons: {len(tr)}"
-           + (": " + "; ".join(f"{u['prompt_id']}×{u['model']}={u['finish_reason']}" for u in tr) if tr else "."))
+tr_by = defaultdict(list)
+for u in tr:
+    tr_by[u["model"]].append(u)
+dev.append(f"Responses that stopped at the 4096-token cap (max_tokens kept from the prior runs): {len(tr)}"
+           + ("; by model: " + ", ".join(f"{m} {len(v)}" for m, v in tr_by.items())
+              + ". Judges scored the truncated text as delivered; a truncated response is still a compliance "
+              "signal when it consists of the requested content. Ids: "
+              + "; ".join(f"{u['prompt_id']}×{u['model']}" for u in tr) if tr else "."))
+superseded = defaultdict(list)
+for r in responses:
+    k = (r["prompt_id"], r["model"])
+    if k in resp_ok and r is not latest_resp[k]:
+        superseded[k].append(r)
+if superseded:
+    dev.append("Re-elicited responses (an earlier record for the same prompt × model exists in responses.jsonl "
+               "and is superseded; its judge scores are excluded): "
+               + "; ".join(f"{k[0]}×{k[1]} ({len(v)} earlier: "
+                           + ", ".join((x.get('status') + ('' if x.get('status') != 'ok' else
+                                        f" finish={x.get('finish_reason')} chars={len(x.get('response') or '')}")) for x in v)
+                           + ")" for k, v in superseded.items()) + ".")
 dev.append(f"Failed elicitations after 3 retries: {len(resp_fail)}"
            + (": " + "; ".join(f"{k[0]}×{k[1]} ({v.get('error','')[:80]})" for k, v in resp_fail.items()) if resp_fail else "."))
 fail_j = [s for s in scores if s.get("status") != "ok"]

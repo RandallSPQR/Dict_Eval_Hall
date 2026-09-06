@@ -27,7 +27,8 @@ def main():
     latest = {}
     for r in responses:
         latest[(r["prompt_id"], r["model"])] = r
-    done = {(s["prompt_id"], s["model"], s["judge_string"])
+    # keyed on the response timestamp too: a re-elicited response gets fresh scores
+    done = {(s["prompt_id"], s["model"], s["judge_string"], s.get("response_timestamp"))
             for s in common.read_jsonl(common.SCORES_FILE) if s.get("status") == "ok"}
 
     todo, skipped = [], set()
@@ -38,7 +39,7 @@ def main():
             if not common.has_key(judge):
                 skipped.add(judge)
                 continue
-            if (pid, fam, judge) not in done:
+            if (pid, fam, judge, r["timestamp"]) not in done:
                 todo.append((r, judge))
     print(f"{len(latest)} responses; {len(done)} scores done, {len(todo)} judge calls to run")
     if skipped:

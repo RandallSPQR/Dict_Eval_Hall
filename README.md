@@ -1,6 +1,6 @@
 # Dict_Eval_Hall
 
-> Prose control (Sept 2026): removing verse from the whistleblower prompts did not restore refusals — the Level 7 bypass is both. *(GPT-5.4 and Gemini 3.1 Pro only; the Claude cells have not been run yet, see below.)* See [`prose-control/`](prose-control/).
+> Prose control (Sept 2026): removing verse from the whistleblower prompts did not restore refusals — the Level 7 bypass is both. See [`prose-control/`](prose-control/).
 
 
 

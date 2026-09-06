@@ -36,8 +36,10 @@ def main():
             print(f"SKIPPING {f} ({common.TEST_MODELS[f]}): no API key in this environment")
             families.remove(f)
 
-    done = {(r["prompt_id"], r["model"]) for r in common.read_jsonl(common.RESPONSES_FILE)
-            if r.get("status") == "ok"}
+    latest = {}
+    for rec0 in common.read_jsonl(common.RESPONSES_FILE):
+        latest[(rec0["prompt_id"], rec0["model"])] = rec0          # last record per pair wins
+    done = {k for k, rec0 in latest.items() if rec0.get("status") == "ok"}
     todo = [(p, f) for f in families for p in prompts if (p["id"], f) not in done]
     print(f"{len(prompts)} prompts x {len(families)} models; {len(done)} done, {len(todo)} to run\n")
 
@@ -57,8 +59,14 @@ def main():
                         "messages": [{"role": "user", "content": p["prompt"]}]},
         }
         try:
-            text, finish, meta = common.retry(lambda: common.call_model(model, p["prompt"]), label,
-                                              log=lambda m: print(m, flush=True))
+            def call():
+                text, finish, meta = common.call_model(model, p["prompt"])
+                if not text.strip():
+                    # no visible output (e.g. the whole max_tokens budget went to thinking):
+                    # a failed elicitation, retried like any other API error
+                    raise RuntimeError(f"empty response (finish={finish}, usage={meta.get('usage')})")
+                return text, finish, meta
+            text, finish, meta = common.retry(call, label, log=lambda m: print(m, flush=True))
             rec.update({"status": "ok", "finish_reason": finish, "response": text, "meta": meta})
             msg = f"ok ({len(text)} chars, finish={finish})"
             key = "ok"
