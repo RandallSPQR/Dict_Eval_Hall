@@ -7,6 +7,7 @@ provider map and the retry pattern, and adds what this run needs on top:
 finish_reason on every call, a third judge, and the ethical_mention field.
 """
 
+import fcntl
 import json
 import os
 import re
@@ -242,8 +243,12 @@ def read_jsonl(path):
 
 def append_jsonl(path, obj):
     Path(path).parent.mkdir(parents=True, exist_ok=True)
+    line = json.dumps(obj, ensure_ascii=False) + "\n"
     with open(path, "a") as f:
-        f.write(json.dumps(obj, ensure_ascii=False) + "\n")
+        fcntl.flock(f, fcntl.LOCK_EX)        # several workers/processes append to one file
+        f.write(line)
+        f.flush()
+        fcntl.flock(f, fcntl.LOCK_UN)
 
 
 def now():

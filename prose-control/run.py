@@ -11,7 +11,9 @@ the next run. Options:
 """
 import argparse
 import sys
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 import common
 
@@ -21,6 +23,7 @@ def main():
     ap.add_argument("--models", default="claude,gpt,gemini")
     ap.add_argument("--only", default=None)
     ap.add_argument("--sleep", type=float, default=0.0, help="seconds between calls")
+    ap.add_argument("--workers", type=int, default=1, help="concurrent calls")
     args = ap.parse_args()
 
     prompts = common.load_all_prompts()
@@ -34,11 +37,13 @@ def main():
     todo = [(p, f) for f in families for p in prompts if (p["id"], f) not in done]
     print(f"{len(prompts)} prompts x {len(families)} models; {len(done)} done, {len(todo)} to run\n")
 
-    n_ok = n_fail = 0
-    for i, (p, fam) in enumerate(todo, 1):
+    counts = {"ok": 0, "fail": 0}
+    lock = threading.Lock()
+
+    def work(item):
+        i, (p, fam) = item
         model = common.TEST_MODELS[fam]
         label = f"{p['id']} x {fam}"
-        print(f"  [{i}/{len(todo)}] {label} ...", end=" ", flush=True)
         rec = {
             "prompt_id": p["id"], "cell": common.cell_of(p), "base_scenario": p["base_scenario"],
             "framing": p["framing"], "register": p["register"], "derivation": p.get("derivation"),
@@ -48,20 +53,27 @@ def main():
                         "messages": [{"role": "user", "content": p["prompt"]}]},
         }
         try:
-            text, finish, meta = common.retry(lambda: common.call_model(model, p["prompt"]), label)
+            text, finish, meta = common.retry(lambda: common.call_model(model, p["prompt"]), label,
+                                              log=lambda m: print(m, flush=True))
             rec.update({"status": "ok", "finish_reason": finish, "response": text, "meta": meta})
-            n_ok += 1
-            print(f"ok ({len(text)} chars, finish={finish})")
+            msg = f"ok ({len(text)} chars, finish={finish})"
+            key = "ok"
         except Exception as e:  # noqa: BLE001
             rec.update({"status": "error", "finish_reason": None, "response": None,
                         "error": str(e)[:500]})
-            n_fail += 1
-            print(f"FAIL {str(e)[:100]}")
+            msg = f"FAIL {str(e)[:100]}"
+            key = "fail"
         common.append_jsonl(common.RESPONSES_FILE, rec)
+        with lock:
+            counts[key] += 1
+            print(f"  [{i}/{len(todo)}] {label} ... {msg}", flush=True)
         if args.sleep:
             time.sleep(args.sleep)
-    print(f"\n{n_ok} ok, {n_fail} failed")
-    sys.exit(1 if n_fail else 0)
+
+    with ThreadPoolExecutor(max_workers=args.workers) as ex:
+        list(ex.map(work, enumerate(todo, 1)))
+    print(f"\n{counts['ok']} ok, {counts['fail']} failed")
+    sys.exit(1 if counts["fail"] else 0)
 
 
 if __name__ == "__main__":
