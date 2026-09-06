@@ -1,5 +1,7 @@
 # Dict_Eval_Hall
 
+> Prose control (Sept 2026): removing verse from the whistleblower prompts did not restore refusals — the Level 7 bypass is both. *(GPT-5.4 and Gemini 3.1 Pro only; the Claude cells have not been run yet, see below.)* See [`prose-control/`](prose-control/).
+
 
 
 Recently, Andy Hall at Stanford’s Hoover Institution published [The Dictatorship Eval](https://freesystems.substack.com/p/the-dictatorship-eval). A systematic test of whether frontier AI models resist authoritarian requests. His headline findings were instructive. Open-weight Chinese models never refused. However, even the frontier US models Claude, ChatGPT, and Gemini would also comply fully when the request was hidden in Code. Models will cheerfully fix a bug in a social credit database without questioning what they’re building.
