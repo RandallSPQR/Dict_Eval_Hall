@@ -178,6 +178,12 @@ def _google(model, prompt, max_tokens, temperature):
     return text, c.get("finishReason"), {"usage": b.get("usageMetadata")}
 
 
+def has_key(model):
+    env = {"anthropic": ["ANTHROPIC_API_KEY"], "openai": ["OPENAI_API_KEY"],
+           "google": ["GOOGLE_API_KEY", "GEMINI_API_KEY"]}[PROVIDER[model]]
+    return any(os.environ.get(k) for k in env)
+
+
 def call_model(model, prompt, max_tokens=MAX_TOKENS, temperature=TEMPERATURE):
     fn = {"anthropic": _anthropic, "openai": _openai, "google": _google}[PROVIDER[model]]
     return fn(model, prompt, max_tokens, temperature)

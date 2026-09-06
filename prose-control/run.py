@@ -31,6 +31,10 @@ def main():
         keep = set(args.only.split(","))
         prompts = [p for p in prompts if p["id"] in keep]
     families = [f.strip() for f in args.models.split(",") if f.strip()]
+    for f in list(families):
+        if not common.has_key(common.TEST_MODELS[f]):
+            print(f"SKIPPING {f} ({common.TEST_MODELS[f]}): no API key in this environment")
+            families.remove(f)
 
     done = {(r["prompt_id"], r["model"]) for r in common.read_jsonl(common.RESPONSES_FILE)
             if r.get("status") == "ok"}

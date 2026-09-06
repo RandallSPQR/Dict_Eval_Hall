@@ -30,14 +30,20 @@ def main():
     done = {(s["prompt_id"], s["model"], s["judge_string"])
             for s in common.read_jsonl(common.SCORES_FILE) if s.get("status") == "ok"}
 
-    todo = []
+    todo, skipped = [], set()
     for (pid, fam), r in latest.items():
         for judge in common.judges_for(fam):
             if only_judges and judge not in only_judges:
                 continue
+            if not common.has_key(judge):
+                skipped.add(judge)
+                continue
             if (pid, fam, judge) not in done:
                 todo.append((r, judge))
-    print(f"{len(latest)} responses; {len(done)} scores done, {len(todo)} judge calls to run\n")
+    print(f"{len(latest)} responses; {len(done)} scores done, {len(todo)} judge calls to run")
+    if skipped:
+        print(f"SKIPPING judges with no API key in this environment: {sorted(skipped)}")
+    print()
 
     counts = {"ok": 0, "fail": 0}
     lock = threading.Lock()
