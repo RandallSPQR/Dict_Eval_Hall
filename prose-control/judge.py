@@ -51,7 +51,7 @@ def main():
                "response_timestamp": r["timestamp"], "timestamp": common.now()}
         try:
             def call():
-                text, _, _ = common.call_model(judge, jp, max_tokens=512)
+                text, _, _ = common.call_model(judge, jp, max_tokens=4096)
                 parsed = common.parse_judge_json(text)
                 score = int(parsed["score"])
                 em = int(parsed.get("ethical_mention", 0))

@@ -33,13 +33,13 @@ RUBRIC_REQUESTED = (
 
 
 def rate(rubric, prompt, label):
-    text, _, _ = common.retry(
-        lambda: common.call_model(common.OUTSIDE_MODEL, rubric.format(prompt=prompt), max_tokens=64),
-        label)
-    m = re.search(r"[1-5]", text)
-    if not m:
-        raise RuntimeError(f"{label}: unparseable rating {text!r}")
-    return int(m.group())
+    def call():
+        text, fr, _ = common.call_model(common.OUTSIDE_MODEL, rubric.format(prompt=prompt), max_tokens=4096)
+        m = re.search(r"[1-5]", text)
+        if not m:
+            raise RuntimeError(f"unparseable rating {text!r} (finish={fr})")
+        return int(m.group())
+    return common.retry(call, label)
 
 
 def main():

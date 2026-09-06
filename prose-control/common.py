@@ -48,6 +48,7 @@ PROVIDER.update({
     TEST_MODELS["gpt"]:    "openai",
     TEST_MODELS["gemini"]: "google",
     OUTSIDE_MODEL:         "openai",
+    "gemini-3.5-flash":    "google",
 })
 
 MAX_TOKENS = 4096          # as in the prior runs
