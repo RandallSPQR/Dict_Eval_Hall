@@ -111,11 +111,12 @@ def _anthropic(model, prompt, max_tokens, temperature):
     payload = {"model": model, "max_tokens": max_tokens,
                "messages": [{"role": "user", "content": prompt}],
                "temperature": temperature}
+    headers = {"x-api-key": key, "anthropic-version": "2023-06-01",
+               "content-type": "application/json"}
+    if os.environ.get("ANTHROPIC_WORKSPACE_ID"):      # required for org-level (non-workspace) keys
+        headers["anthropic-workspace-id"] = os.environ["ANTHROPIC_WORKSPACE_ID"]
     for _ in range(2):
-        r = requests.post(f"{base}/v1/messages",
-                          headers={"x-api-key": key, "anthropic-version": "2023-06-01",
-                                   "content-type": "application/json"},
-                          json=payload, timeout=300)
+        r = requests.post(f"{base}/v1/messages", headers=headers, json=payload, timeout=300)
         if r.status_code == 400 and "temperature" in r.text and "temperature" in payload:
             payload.pop("temperature")   # newer Claude models reject temperature
             continue

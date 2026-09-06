@@ -126,6 +126,7 @@ completes without touching anything already collected:
 
 ```bash
 export ANTHROPIC_API_KEY=...
+export ANTHROPIC_WORKSPACE_ID=...   # only for org-level keys that are not scoped to a workspace
 cd prose-control
 python3 run.py --models claude --workers 3      # 54 Claude responses
 python3 judge.py --workers 4                    # Claude judge on the 108 existing responses + 3 judges on the new 54
