@@ -52,7 +52,7 @@ def main():
         sys.exit(f"only {len(out)} rows parsed; page layout may have changed")
     OUT_CSV.parent.mkdir(parents=True, exist_ok=True)
     with open(OUT_CSV, "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=["ticker", "name", "gics_sector"])
+        w = csv.DictWriter(f, fieldnames=["ticker", "name", "gics_sector"], lineterminator="\n")
         w.writeheader()
         w.writerows(out)
     meta = {

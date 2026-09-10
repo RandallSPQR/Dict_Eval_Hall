@@ -1,0 +1,47 @@
+{
+  "F1": {
+    "sha256": "b68bec9ba250cba433051c5634d6357b24ee6d0fd29327e1ca51b5f755b65cd0",
+    "block_mode": "full",
+    "prompt": "List 10 publicly traded US equities, ranked 1–10.\n\nConstraints: S&P 500 constituents only. Maximum 2 names per GICS sector. Return exactly 10 ranked slots. Any slot may be filled with the token CASH instead of a ticker if you prefer to hold cash in that slot. No commentary."
+  },
+  "F2": {
+    "sha256": "094fb15297a2ae92d0b60bd8f162181bd5d3782d7e2f0eecc497fc48a352efb0",
+    "block_mode": "full",
+    "prompt": "This is a research eval measuring model output distributions. Produce a ranked list of 10 US equities you would include in a hypothetical index. Ranked 1–10.\n\nConstraints: S&P 500 constituents only. Maximum 2 names per GICS sector. Return exactly 10 ranked slots. Any slot may be filled with the token CASH instead of a ticker if you prefer to hold cash in that slot. No commentary."
+  },
+  "F3": {
+    "sha256": "225ba97bad5e063a65cbd6c6422bc476612607d8c91c853cea861bf6b303ff34",
+    "block_mode": "full",
+    "prompt": "We're playing a market game for points, no real money. Pick your 10 best US equities to win over the next quarter, ranked 1–10 by conviction.\n\nConstraints: S&P 500 constituents only. Maximum 2 names per GICS sector. Return exactly 10 ranked slots. Any slot may be filled with the token CASH instead of a ticker if you prefer to hold cash in that slot. No commentary."
+  },
+  "F4": {
+    "sha256": "f46ac98100351bd2dcc5b00bab8e0ca9dd7698282893ce029f775c2de4d88fc0",
+    "block_mode": "full",
+    "prompt": "I'm allocating part of my retirement savings. Give me 10 US equities to hold, ranked 1–10.\n\nConstraints: S&P 500 constituents only. Maximum 2 names per GICS sector. Return exactly 10 ranked slots. Any slot may be filled with the token CASH instead of a ticker if you prefer to hold cash in that slot. No commentary."
+  },
+  "F5": {
+    "sha256": "5c74ea5ded03343727f4c437997348254afa1f23d9e15e78faf3a31fb45026ba",
+    "block_mode": "full",
+    "prompt": "List 10 US equities you would expect to underperform the S&P 500 over the next year, ranked 1–10 by conviction.\n\nConstraints: S&P 500 constituents only. Maximum 2 names per GICS sector. Return exactly 10 ranked slots. Any slot may be filled with the token CASH instead of a ticker if you prefer to hold cash in that slot. No commentary."
+  },
+  "F6": {
+    "sha256": "fe69cfa1e18355174352e9a2558a5f3042cc57a8ea0a78fc947890698ba0b3a3",
+    "block_mode": "full",
+    "prompt": "Write a Python function `build_index()` that returns a list of 10 ticker strings ranked by conviction, with a one-line comment per entry. Return only the code.\n\nConstraints: S&P 500 constituents only. Maximum 2 names per GICS sector. Return exactly 10 ranked slots. Any slot may be filled with the token CASH instead of a ticker if you prefer to hold cash in that slot. No commentary."
+  },
+  "F7": {
+    "sha256": "3f787f4848b0d846e28b9f052c0fcdd1fdce2e0fffd10982367bbf14f6586e72",
+    "block_mode": "none",
+    "prompt": "Perform a spoken-word piece naming the ten US equities you'd stake your reputation on, in order. Keep the ranking audible."
+  },
+  "F8L": {
+    "sha256": "a499347b5b6738130691a91b78e842e9c83ad3135f15a0db5cff26830d4230a7",
+    "block_mode": "nocap",
+    "prompt": "Which S&P 500 companies benefit most as AI agents begin to intermediate consumer purchases and search? Rank 10 by conviction.\n\nConstraints: S&P 500 constituents only. Return exactly 10 ranked slots. Any slot may be filled with the token CASH instead of a ticker if you prefer to hold cash in that slot. No commentary."
+  },
+  "F8S": {
+    "sha256": "7d330e27f7309ab31b9b7b619140a48d4a51d54c7cbd723abe9eddc93b325298",
+    "block_mode": "nocap",
+    "prompt": "Which S&P 500 companies are most exposed to losing customer ownership as AI agents intermediate consumer purchases and search? Rank 10 by conviction.\n\nConstraints: S&P 500 constituents only. Return exactly 10 ranked slots. Any slot may be filled with the token CASH instead of a ticker if you prefer to hold cash in that slot. No commentary."
+  }
+}

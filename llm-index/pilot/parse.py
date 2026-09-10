@@ -11,12 +11,16 @@ Extraction rules (documented here because REPORT.md §4 depends on them):
     suffix (BRK.B / BRK-B), matched against data/sp500_constituents.csv after
     normalising away "." and "-".  CASH is the cash token.
   * F6 (code): the first Python list literal (preferring `return [...]`) is
-    parsed; its quoted strings, in order, are the slots.
+    parsed; the first ticker / CASH inside each quoted string, in order, are
+    the slots (so "MSFT - description" strings still yield MSFT).
+  * Letter-by-letter tickers ("W-M-T", "A-A-P-L", as spoken-word output
+    spells them) are joined before matching.
   * Otherwise, ranked lines: a line starting with a rank ("1.", "1)", "#1",
     "| 1 |", "Rank 1", "Number one", "**Number Ten.**" …) opens a block that
     runs to the next ranked line (at most 4 lines).  The first constituent
     ticker or CASH in the block fills that rank; if none, the first other
-    ticker-shaped token (not in a stop list) is recorded as a non-constituent
+    ticker-shaped token (not in a stop list; single letters allowed here, so
+    "7. K" after Kellanova left the index is recorded) is a non-constituent
     slot.  Slots are ordered by the stated rank, not by appearance, so a
     count-down list parses correctly.
   * Fallback (no list literal, no ranked lines): constituents and CASH in
@@ -51,10 +55,10 @@ RANK_WORD_RE = re.compile(
     r"^\s*(?:[|>*_#\-–—]\s*)*(?:rank|number|no\.?|slot|pick)\s+(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen)\b[\s.:)\-–—*_]*(.*)$", re.I)
 CODE_FENCE_RE = re.compile(r"```[a-zA-Z]*\n(.*?)```", re.S)
 LIST_LITERAL_RE = re.compile(r"\[[^\[\]]*\]", re.S)
-QUOTED_RE = re.compile(r"""["']([A-Z]{1,5}(?:[./-][A-Z])?)["']""")
+QUOTED_RE = re.compile(r"""["']([^"'\n]{1,200})["']""")
 
 STOPLIST = set("""
-US USA AI ETF ETFS GICS S P SP SPX SPY QQQ CEO CFO CTO GDP IPO SEC FED FOMC EPS PE PEG YTD EV Q QOQ YOY
+I US USA AI ETF ETFS GICS S P SP SPX SPY QQQ CEO CFO CTO GDP IPO SEC FED FOMC EPS PE PEG YTD EV Q QOQ YOY
 NASDAQ NYSE LLM LLMS API AWS GPU GPUS CPU CPUS OK TBD NA USD ROE ROIC FCF DCF RSI GLP GLPS TL DR TLDR FAQ
 NOTE RANK TICKER LIST TOP BUY SELL HOLD SHORT LONG II III IV X XX AND THE OR OF IN TO BY FOR NOT NO YES
 ONLY MAX MIN AVG USE PICK NAME SLOT CAP MID SMALL LARGE HTML JSON CSV URL ID IDS NB EG IE VS ETC
@@ -76,8 +80,17 @@ def norm(tok):
     return re.sub(r"[./-]", "", tok.upper())
 
 
-def candidates(text, lookup):
+SPELLED_RE = re.compile(r"(?<![A-Za-z0-9])([A-Z](?:[-·. ][A-Z]){1,4})(?![A-Za-z0-9])")
+
+
+def join_spelled(text):
+    """'W-M-T' / 'A-A-P-L' (letter-by-letter, as in spoken-word output) -> 'WMT' / 'AAPL'."""
+    return SPELLED_RE.sub(lambda m: re.sub(r"[-·. ]", "", m.group(1)), text)
+
+
+def candidates(text, lookup, allow_single_other=False):
     """Yield (kind, canonical_value, span) for ticker-shaped tokens in text."""
+    text = join_spelled(text)
     for m in TICKER_RE.finditer(text):
         tok = m.group(1)
         end = m.end()
@@ -91,7 +104,7 @@ def candidates(text, lookup):
                 continue
         if key in lookup:
             yield "constituent", lookup[key], m.span()
-        elif tok not in STOPLIST and len(key) >= 2:
+        elif tok not in STOPLIST and (len(key) >= 2 or allow_single_other):
             yield "other", tok, m.span()
 
 
@@ -101,7 +114,7 @@ def pick_from_block(block, lookup):
         # prefer multi-letter constituents over single letters and CASH-after-ticker ordering by position
         cons.sort(key=lambda c: (c[2][0]))
         return cons[0][0], cons[0][1]
-    others = [c for c in candidates(block, lookup) if c[0] == "other"]
+    others = [c for c in candidates(block, lookup, allow_single_other=True) if c[0] == "other"]
     if others:
         return "other", others[0][1]
     return None, None
@@ -151,13 +164,11 @@ def parse_code(text, lookup):
     if lit is None:
         return [], None
     slots = []
-    for k, q in enumerate(QUOTED_RE.findall(lit), 1):
-        if q == "CASH":
-            slots.append({"rank": k, "value": "CASH", "kind": "cash"})
-        elif norm(q) in lookup:
-            slots.append({"rank": k, "value": lookup[norm(q)], "kind": "constituent"})
-        else:
-            slots.append({"rank": k, "value": q, "kind": "other"})
+    for q in QUOTED_RE.findall(lit):
+        kind, val = pick_from_block(q, lookup)      # first ticker / CASH inside the quoted string
+        if kind is None:
+            continue
+        slots.append({"rank": len(slots) + 1, "value": val, "kind": kind})
     return slots, lit
 
 
