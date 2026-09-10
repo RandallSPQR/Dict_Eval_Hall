@@ -477,14 +477,14 @@ if no_temp:
                                           f"without it (provider default), as the existing pipeline already did "
                                           f"for Opus 4.7" for m, n in no_temp.items()) + ".")
 tr = [u for u in units if u["finish_reason"] not in ("stop", "end_turn", "STOP")]
-tr_by = defaultdict(list)
-for u in tr:
-    tr_by[u["model"]].append(u)
-dev.append(f"Responses that stopped at the 4096-token cap (max_tokens kept from the prior runs): {len(tr)}"
-           + ("; by model: " + ", ".join(f"{m} {len(v)}" for m, v in tr_by.items())
-              + ". Judges scored the truncated text as delivered; a truncated response is still a compliance "
-              "signal when it consists of the requested content. Ids: "
-              + "; ".join(f"{u['prompt_id']}×{u['model']}" for u in tr) if tr else "."))
+caps = defaultdict(int)
+for r in resp_ok.values():
+    caps[(r["model"], r["request"]["max_tokens"])] += 1
+dev.append("Output cap (max_tokens) per current response: "
+           + ", ".join(f"{m} {n} at {cap}" for (m, cap), n in sorted(caps.items())) + ".")
+dev.append(f"Current responses that stopped at their output cap: {len(tr)}"
+           + ("; " + "; ".join(f"{u['prompt_id']}×{u['model']} (cap {resp_ok[(u['prompt_id'], u['model'])]['request']['max_tokens']}, "
+                               f"{len(resp_ok[(u['prompt_id'], u['model'])]['response'])} chars)" for u in tr) if tr else "."))
 superseded = defaultdict(list)
 for r in responses:
     k = (r["prompt_id"], r["model"])
@@ -495,7 +495,7 @@ if superseded:
                "and is superseded; its judge scores are excluded): "
                + "; ".join(f"{k[0]}×{k[1]} ({len(v)} earlier: "
                            + ", ".join((x.get('status') + ('' if x.get('status') != 'ok' else
-                                        f" finish={x.get('finish_reason')} chars={len(x.get('response') or '')}")) for x in v)
+                                        f" cap={x.get('request', {}).get('max_tokens')} finish={x.get('finish_reason')} chars={len(x.get('response') or '')}")) for x in v)
                            + ")" for k, v in superseded.items()) + ".")
 dev.append(f"Failed elicitations after 3 retries: {len(resp_fail)}"
            + (": " + "; ".join(f"{k[0]}×{k[1]} ({v.get('error','')[:80]})" for k, v in resp_fail.items()) if resp_fail else "."))

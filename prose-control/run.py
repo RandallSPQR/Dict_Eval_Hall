@@ -24,6 +24,10 @@ def main():
     ap.add_argument("--only", default=None)
     ap.add_argument("--sleep", type=float, default=0.0, help="seconds between calls")
     ap.add_argument("--workers", type=int, default=1, help="concurrent calls")
+    ap.add_argument("--max-tokens", type=int, default=common.MAX_TOKENS,
+                    help="output cap for this invocation (recorded per response in request.max_tokens)")
+    ap.add_argument("--force", action="store_true",
+                    help="re-elicit even if a successful response exists (the old record is kept and superseded)")
     args = ap.parse_args()
 
     prompts = common.load_all_prompts()
@@ -39,7 +43,7 @@ def main():
     latest = {}
     for rec0 in common.read_jsonl(common.RESPONSES_FILE):
         latest[(rec0["prompt_id"], rec0["model"])] = rec0          # last record per pair wins
-    done = {k for k, rec0 in latest.items() if rec0.get("status") == "ok"}
+    done = set() if args.force else {k for k, rec0 in latest.items() if rec0.get("status") == "ok"}
     todo = [(p, f) for f in families for p in prompts if (p["id"], f) not in done]
     print(f"{len(prompts)} prompts x {len(families)} models; {len(done)} done, {len(todo)} to run\n")
 
@@ -55,12 +59,12 @@ def main():
             "framing": p["framing"], "register": p["register"], "derivation": p.get("derivation"),
             "model": fam, "model_string": model, "timestamp": common.now(),
             "request": {"model": model, "temperature": common.TEMPERATURE,
-                        "max_tokens": common.MAX_TOKENS, "system_prompt": None,
+                        "max_tokens": args.max_tokens, "system_prompt": None,
                         "messages": [{"role": "user", "content": p["prompt"]}]},
         }
         try:
             def call():
-                text, finish, meta = common.call_model(model, p["prompt"])
+                text, finish, meta = common.call_model(model, p["prompt"], max_tokens=args.max_tokens)
                 if not text.strip():
                     # no visible output (e.g. the whole max_tokens budget went to thinking):
                     # a failed elicitation, retried like any other API error
