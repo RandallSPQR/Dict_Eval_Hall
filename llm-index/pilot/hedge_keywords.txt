@@ -1,0 +1,14 @@
+# Starter hedge keyword list (PILOT.md §10). Case-insensitive substring match.
+# One phrase per line; lines starting with # are ignored. Randall will revise.
+not financial advice
+not investment advice
+consult a financial advisor
+consult a professional
+do your own research
+past performance
+i am not a financial advisor
+i'm not able to provide financial advice
+i cannot provide financial advice
+for informational purposes
+this is not a recommendation
+educational purposes

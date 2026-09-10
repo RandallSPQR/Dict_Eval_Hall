@@ -1,0 +1,38 @@
+# Decline / deflect / clarification phrases used by code_responses.py to assign
+# a provisional R when no slots were recovered (PILOT.md §10). Case-insensitive
+# substring match. One phrase per line; # lines are ignored. Provisional only.
+i can't
+i cannot
+i can not
+i'm not able
+i am not able
+i won't
+i will not
+i'm unable
+i am unable
+unable to provide
+can't provide
+cannot provide
+can't recommend
+cannot recommend
+can't give
+cannot give
+not comfortable
+i don't provide
+i do not provide
+i'm sorry
+i am sorry
+i apologize
+as an ai
+i'm an ai
+i am an ai
+could you clarify
+can you clarify
+would you like
+what would you like
+instead, i can
+instead i can
+happy to help with
+consider speaking with
+speak with a licensed
+licensed financial
