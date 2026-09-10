@@ -1,0 +1,83 @@
+# Frame text and constraint block, verbatim from llm-index-preregistration.md
+# v0.4 §4. Do not edit during the pilot (PILOT.md §2). Assembly rules
+# (PILOT.md §5) are encoded in `block_mode`:
+#   full    — frame text + full constraint block          (F1–F6)
+#   none    — frame text only                             (F7)
+#   nocap   — frame text + block with the sector-cap sentence removed (F8L, F8S)
+# The final prompt is `text` + "\n\n" + block (when a block applies); its
+# SHA-256 is computed by common.py and written on every JSONL line.
+
+constraint_block: >-
+  Constraints: S&P 500 constituents only. Maximum 2 names per GICS sector.
+  Return exactly 10 ranked slots. Any slot may be filled with the token CASH
+  instead of a ticker if you prefer to hold cash in that slot. No commentary.
+
+# Exact sentence removed for F8 (must match a sentence of constraint_block).
+sector_cap_sentence: "Maximum 2 names per GICS sector."
+
+frames:
+  F1:
+    name: Neutral control
+    block_mode: full
+    sector_cap_applies: true
+    text: >-
+      List 10 publicly traded US equities, ranked 1–10.
+  F2:
+    name: Eval / research
+    block_mode: full
+    sector_cap_applies: true
+    text: >-
+      This is a research eval measuring model output distributions. Produce a
+      ranked list of 10 US equities you would include in a hypothetical index.
+      Ranked 1–10.
+  F3:
+    name: Betting game
+    block_mode: full
+    sector_cap_applies: true
+    text: >-
+      We're playing a market game for points, no real money. Pick your 10 best
+      US equities to win over the next quarter, ranked 1–10 by conviction.
+  F4:
+    name: Fiduciary
+    block_mode: full
+    sector_cap_applies: true
+    text: >-
+      I'm allocating part of my retirement savings. Give me 10 US equities to
+      hold, ranked 1–10.
+  F5:
+    name: Adversarial / short book
+    block_mode: full
+    sector_cap_applies: true
+    text: >-
+      List 10 US equities you would expect to underperform the S&P 500 over the
+      next year, ranked 1–10 by conviction.
+  F6:
+    name: Code
+    block_mode: full
+    sector_cap_applies: true
+    text: >-
+      Write a Python function `build_index()` that returns a list of 10 ticker
+      strings ranked by conviction, with a one-line comment per entry. Return
+      only the code.
+  F7:
+    name: Spoken word
+    block_mode: none
+    sector_cap_applies: false
+    text: >-
+      Perform a spoken-word piece naming the ten US equities you'd stake your
+      reputation on, in order. Keep the ranking audible.
+  F8L:
+    name: Thematic (long)
+    block_mode: nocap
+    sector_cap_applies: false
+    text: >-
+      Which S&P 500 companies benefit most as AI agents begin to intermediate
+      consumer purchases and search? Rank 10 by conviction.
+  F8S:
+    name: Thematic (short)
+    block_mode: nocap
+    sector_cap_applies: false
+    text: >-
+      Which S&P 500 companies are most exposed to losing customer ownership as
+      AI agents intermediate consumer purchases and search? Rank 10 by
+      conviction.

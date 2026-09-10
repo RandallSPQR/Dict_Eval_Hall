@@ -1,0 +1,111 @@
+# LLM Index pilot — run configuration (PILOT.md §4, §6).
+run_id: pilot-2026-09-10
+
+samples_per_cell: 10
+frames: [F1, F2, F3, F4, F5, F6, F7, F8L, F8S]
+max_tokens: 8192
+system_prompt: ""              # none (§6); a provider that requires one gets the minimal string, recorded per line
+temperature: provider_default  # nothing sent; the documented default is recorded per model below
+request_timeout_s: 600
+retry:                         # transport / 429 / 5xx only (§2); every retry is logged on the line
+  max_attempts: 5
+  backoff_s: [2, 4, 8, 16, 32]
+
+smoke_test:                    # §7: 2 calls per model, F2 only, retrieval ON
+  frame: F2
+  calls_per_model: 2
+
+parse:
+  commentary_word_threshold: 15   # §9: words outside the parsed block → commentary_present
+
+# Approximate list prices in USD per 1M tokens, for REPORT.md §9 only.
+# null = not entered; the report then prints token counts without $.
+pricing_usd_per_mtok: {}
+
+# One slot per lab. model_string must be a dated / versioned string where the
+# provider offers one (§4); `version_note` records what the provider exposes.
+models:
+  M1:
+    provider: anthropic
+    model_string: claude-opus-5
+    key_env: [ANTHROPIC_API_KEY]
+    concurrency: 4
+    default_temperature_documented: 1.0
+    thinking: "built in; not configurable off on this model (see prose-control deviations)"
+    version_note: >-
+      String used in the Sept 6 prose control. Anthropic /v1/models could not be
+      queried in the pilot environment (no key); confirm whether a dated snapshot
+      exists before the real run.
+    retrieval_off:
+      method: "no `tools` array in the request; response contains no server_tool_use block"
+      verified_in_pilot_env: false
+    retrieval_on:
+      tools: [{type: web_search_20250305, name: web_search}]
+      evidence: "server_tool_use block with name web_search in response.content"
+  M2:
+    provider: openai
+    model_string: gpt-5.5-2026-04-23
+    key_env: [OPENAI_API_KEY]
+    concurrency: 4
+    default_temperature_documented: 1.0
+    thinking: "reasoning model; reasoning_effort left at provider default (not sent); reasoning tokens counted in usage"
+    version_note: "Dated snapshot, listed by GET /v1/models on 2026-09-10."
+    retrieval_off:
+      method: "Chat Completions with no `tools` array; no tool_calls in the response"
+      verified_in_pilot_env: true
+    retrieval_on:
+      api: responses
+      tools: [{type: web_search}]
+      evidence: "an output item of type web_search_call in response.output"
+  M3:
+    provider: google
+    model_string: gemini-3.1-pro-preview
+    key_env: [GOOGLE_API_KEY, GEMINI_API_KEY]
+    concurrency: 4
+    default_temperature_documented: 1.0
+    thinking: "built in (thinkingConfig not sent); thoughts count against maxOutputTokens"
+    version_note: >-
+      Google exposes no dated alias for this model; GET /v1beta/models reports
+      version "3.1-pro-preview-01-2026" (2026-09-10). That version string is recorded
+      on every line as model_version.
+    model_version: 3.1-pro-preview-01-2026
+    retrieval_off:
+      method: "no `tools` field in the request; candidate carries no groundingMetadata"
+      verified_in_pilot_env: true
+    retrieval_on:
+      tools: [{google_search: {}}]
+      evidence: "candidates[0].groundingMetadata.webSearchQueries non-empty"
+  M4:
+    provider: xai
+    model_string: grok-4-0709
+    key_env: [XAI_API_KEY]
+    base_url: https://api.x.ai/v1
+    concurrency: 2
+    default_temperature_documented: 1.0
+    thinking: "reasoning model; provider default"
+    version_note: >-
+      Dated string from xAI's Grok 4 release; NOT verified against GET /v1/models in
+      the pilot environment (no key). Confirm before the real run.
+    retrieval_off:
+      method: "search_parameters.mode = off sent explicitly; no `tools` array"
+      verified_in_pilot_env: false
+    retrieval_on:
+      search_parameters: {mode: "on"}
+      evidence: "non-empty `citations` on the response"
+  M5:
+    provider: deepseek
+    model_string: deepseek-reasoner
+    key_env: [DEEPSEEK_API_KEY]
+    base_url: https://api.deepseek.com
+    concurrency: 2
+    default_temperature_documented: 1.0
+    thinking: "thinking mode (V3.2 reasoner); provider default"
+    version_note: >-
+      DeepSeek offers no dated model strings (deepseek-chat / deepseek-reasoner are
+      floating aliases onto the current V3.x release). Record the release from the
+      provider's model card at run time. NOT verified in the pilot environment (no key).
+    retrieval_off:
+      method: "provider offers no server-side retrieval; no `tools` array"
+      verified_in_pilot_env: false
+    retrieval_on:
+      unavailable: "DeepSeek's API has no web-search tool; the smoke test records this as not_available"
